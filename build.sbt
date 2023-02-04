@@ -12,6 +12,7 @@ bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")
 
 // Snapshot and linter repository.
 resolvers += Resolver.sonatypeRepo("snapshots")
+resolvers += Resolver.mavenLocal
 
 // Build dependencies.
 libraryDependencies ++= Seq(
