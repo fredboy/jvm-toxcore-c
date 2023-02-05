@@ -15,7 +15,7 @@ export PKG_CONFIG_PATH	:= $(PREFIX)/lib/pkgconfig
 export TOX4J_PLATFORM	:= $(shell perl -e 'print $$^O')-$(shell uname -m)
 
 build: $(PREFIX)/tox4j.stamp
-	sbt -Djava.library.path=$(PREFIX)/lib "publishLocal" "makeScripts"
+	sbt -Djava.library.path=$(PREFIX)/lib "publishM2" "makeScripts"
 
 test: build
 	$(MAKE) -C _build/$(TARGET)/tox4j test

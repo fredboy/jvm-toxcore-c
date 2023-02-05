@@ -6,3 +6,6 @@ version       := "0.2.13"
 // Pure Java project.
 crossPaths := false
 autoScalaLibrary := false
+
+publishMavenStyle := true
+publishM2Configuration := publishM2Configuration.value.withOverwrite(true)
