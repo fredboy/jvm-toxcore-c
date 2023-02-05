@@ -2,36 +2,36 @@
 organization  := "org.toktok"
 name          := "tox4j-c"
 version       := "0.2.3"
-scalaVersion  := "2.11.12"
+scalaVersion  := "2.12.17"
 
-bintrayVcsUrl := Some("https://github.com/TokTok/jvm-toxcore-c")
+publishMavenStyle := true
+publishM2Configuration := publishM2Configuration.value.withOverwrite(true)
 
 /******************************************************************************
  * Dependencies
  ******************************************************************************/
-
-// Snapshot and linter repository.
-resolvers += Resolver.sonatypeRepo("snapshots")
 resolvers += Resolver.mavenLocal
 
 // Build dependencies.
 libraryDependencies ++= Seq(
   "org.toktok" %% "tox4j-api" % version.value,
   "org.toktok" %% "macros" % "0.1.1",
-  "com.chuusai" %% "shapeless" % "2.3.3",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.5.43",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
+  "com.chuusai" %% "shapeless" % "2.3.10",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+  "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+  "com.google.guava" % "guava" % "23.0"
 )
 
 // Test dependencies.
 libraryDependencies ++= Seq(
   "com.storm-enroute" %% "scalameter" % "0.19",
-  "org.jline" % "jline" % "3.14.0",
-  "junit" % "junit" % "4.13",
-  "org.scalacheck" %% "scalacheck" % "1.13.5",
-  "org.scalatest" %% "scalatest" % "3.0.1",
+  "org.jline" % "jline" % "3.22.0",
+  "junit" % "junit" % "4.13.2",
+  "org.scalatest" %% "scalatest" % "3.2.15",
   "org.scalaz" %% "scalaz-concurrent" % "7.3.0-M27",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.30"
+  "org.slf4j" % "slf4j-log4j12" % "2.0.5",
+  "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0",
+  "org.scalatestplus" %% "junit-4-13" % "3.2.15.0"
 ) map (_ % Test)
 
 // Add ScalaMeter as test framework.
@@ -54,9 +54,14 @@ Scalastyle.projectSettings
 
 // Mixed project.
 compileOrder := CompileOrder.Mixed
-scalaSource in Compile := (javaSource in Compile).value
-scalaSource in Test    := (javaSource in Test   ).value
+Compile / scalaSource := (Compile / javaSource).value
+Test / scalaSource := (Test / javaSource).value
 
 // Override Scalastyle configuration for test.
 scalastyleConfigUrl in Test := None
 scalastyleConfig in Test := (scalaSource in Test).value / "scalastyle-config.xml"
+
+Compile / PB.targets := Seq(
+  scalapb.gen(flatPackage = true, javaConversions = true, grpc = true) -> (Compile / sourceManaged).value / "scalapb",
+  PB.gens.java -> (Compile / sourceManaged).value / "scalapb"
+)

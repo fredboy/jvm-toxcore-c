@@ -11,10 +11,10 @@ import im.tox.tox4j.core.options.{ ProxyOptions, ToxOptions }
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class ToxCoreTest extends FunSuite with ToxTestMixin {
+final class ToxCoreTest extends AnyFunSuite with ToxTestMixin {
 
   val publicKey: ToxPublicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).toOption.get
   val eventListener: ToxCoreEventAdapter[Unit] = new ToxCoreEventAdapter[Unit]

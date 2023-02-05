@@ -87,7 +87,7 @@ public final class JToxCoreTest extends JUnitSuite {
       ToxUserStatus status = tox.getStatus();
       expectInt(tox.getTcpPort());
       expectInt(tox.getUdpPort());
-      Void nothing = tox.iterate(null, null);
+      tox.iterate(null, null);
       expectInt(tox.iterationInterval());
       ToxCore tox2 = tox.load(options);
       tox.setName(bytes);

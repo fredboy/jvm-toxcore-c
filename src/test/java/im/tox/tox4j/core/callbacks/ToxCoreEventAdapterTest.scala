@@ -4,9 +4,9 @@ import im.tox.tox4j.core.data._
 import im.tox.tox4j.core.enums._
 import im.tox.tox4j.core.proto._
 import im.tox.tox4j.testing.GetDisjunction._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxCoreEventAdapterTest extends FunSuite {
+final class ToxCoreEventAdapterTest extends AnyFunSuite {
 
   private val listener = new ToxCoreEventAdapter[Unit]
   private val friendNumber = ToxFriendNumber.fromInt(0).get

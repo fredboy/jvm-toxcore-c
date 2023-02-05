@@ -4,9 +4,9 @@ import im.tox.tox4j.core._
 import im.tox.tox4j.core.data.{ ToxFriendAddress, ToxFriendRequestMessage }
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxFriendAddExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxFriendAddExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   private val validAddress = ToxCoreImplFactory.withToxUnit(_.getAddress)
 

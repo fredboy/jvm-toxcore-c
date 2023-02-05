@@ -3,9 +3,9 @@ package im.tox.tox4j.core.exceptions
 import im.tox.tox4j.core.options.{ ProxyOptions, SaveDataOptions }
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{ withToxUnit, withToxes }
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxNewExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxNewExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   test("ToxNewProxyNull") {
     intercept(ToxNewException.Code.PROXY_BAD_HOST) {

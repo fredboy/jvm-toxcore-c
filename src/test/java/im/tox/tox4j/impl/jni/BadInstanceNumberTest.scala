@@ -3,7 +3,7 @@ package im.tox.tox4j.impl.jni
 import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.exceptions.ToxKilledException
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 /**
@@ -11,7 +11,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
  * and bad people using reflection to forge invalid Tox instances.
  */
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class BadInstanceNumberTest extends FunSuite with ScalaCheckPropertyChecks {
+final class BadInstanceNumberTest extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   private def callWithInstanceNumber(instanceNumber: Int): Unit = {
     val tox = new ToxCoreImpl(ToxOptions())

@@ -7,7 +7,7 @@ import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.testing.ToxTestMixin
 import im.tox.tox4j.testing.autotest.AliceBobTestBase.Chatter
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
@@ -23,7 +23,7 @@ object AliceBobTestBase {
   )
 }
 
-abstract class AliceBobTestBase extends FunSuite with ToxTestMixin {
+abstract class AliceBobTestBase extends AnyFunSuite with ToxTestMixin {
 
   protected val logger = Logger(LoggerFactory.getLogger(classOf[AliceBobTestBase]))
 

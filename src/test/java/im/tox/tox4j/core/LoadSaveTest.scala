@@ -6,7 +6,7 @@ import im.tox.tox4j.core.enums.ToxUserStatus
 import im.tox.tox4j.core.options.{ SaveDataOptions, ToxOptions }
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.{ withTox, withToxUnit }
 import im.tox.tox4j.testing.GetDisjunction._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.annotation.tailrec
 
@@ -14,7 +14,7 @@ import scala.annotation.tailrec
   "org.wartremover.warts.ArrayEquals",
   "org.wartremover.warts.Equals"
 ))
-final class LoadSaveTest extends FunSuite {
+final class LoadSaveTest extends AnyFunSuite {
 
   private trait Check {
     def change(tox: ToxCore): Boolean

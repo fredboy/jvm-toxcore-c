@@ -1,7 +1,7 @@
 package im.tox.tox4j.impl.jni
 
 import im.tox.tox4j.core.options.ToxOptions
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 /**
  * These tests solely exist to exercise the C++ code paths that deal with closing and finalisation. If the C++ code has
@@ -10,7 +10,7 @@ import org.scalatest.FlatSpec
  * Although [[System.gc()]] doesn't necessarily perform a GC, on the Oracle JVM it actually does reliably do so.
  * Thus, these tests don't formally test anything, but in reality they do.
  */
-final class FinalizerTest extends FlatSpec {
+final class FinalizerTest extends AnyFlatSpec {
 
   "Garbage collection" should "not crash the JVM when collecting a closed ToxCoreImpl" in {
     System.gc()

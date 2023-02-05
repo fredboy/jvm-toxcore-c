@@ -1,9 +1,9 @@
 package im.tox.tox4j.impl.jni.internal
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-class EventTest extends FlatSpec {
+class EventTest extends AnyFlatSpec {
 
   "callback" should "be called on run()" in {
     val event = new Event

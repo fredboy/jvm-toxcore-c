@@ -6,7 +6,7 @@ import im.tox.tox4j.crypto.exceptions.{ ToxDecryptionException, ToxEncryptionExc
 import im.tox.tox4j.testing.ToxTestMixin
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{ Arbitrary, Gen }
-import org.scalatest.WordSpec
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.language.implicitConversions
@@ -18,7 +18,7 @@ object ToxCryptoTest {
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends WordSpec with ScalaCheckPropertyChecks with ToxTestMixin {
+abstract class ToxCryptoTest(private val toxCrypto: ToxCrypto) extends AnyWordSpec with ScalaCheckPropertyChecks with ToxTestMixin {
 
   private val random = new Random
 

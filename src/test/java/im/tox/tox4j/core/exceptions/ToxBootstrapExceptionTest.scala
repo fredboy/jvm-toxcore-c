@@ -4,9 +4,9 @@ import im.tox.core.network.Port
 import im.tox.tox4j.core.ToxCoreConstants
 import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxBootstrapExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxBootstrapExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   private val host = "192.254.75.98"
   private val publicKey = ToxPublicKey.fromValue(Array.ofDim(ToxCoreConstants.PublicKeySize)).toOption.get

@@ -3,11 +3,11 @@ package im.tox.tox4j.impl.jni
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.impl.jni.proto.JniLog
 import org.scalacheck.Gen
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class ToxJniLogTest extends FunSuite with ScalaCheckPropertyChecks {
+final class ToxJniLogTest extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   private val TestMaxSize = 100
 

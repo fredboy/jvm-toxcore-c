@@ -1,17 +1,14 @@
 package im.tox.tox4j.core
 
 import im.tox.tox4j.core.SmallNat._
-import im.tox.tox4j.core.callbacks.ToxCoreEventListener
 import im.tox.tox4j.core.data.{ ToxFriendNumber, ToxFriendRequestMessage }
-import im.tox.tox4j.core.enums.ToxConnection
 import im.tox.tox4j.impl.jni.ToxCoreImpl
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
-import im.tox.tox4j.testing.GetDisjunction._
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 @SuppressWarnings(Array("org.wartremover.warts.Equals"))
-final class ToxCoreTest extends FlatSpec with ScalaCheckPropertyChecks {
+final class ToxCoreTest extends AnyFlatSpec with ScalaCheckPropertyChecks {
 
   "addFriend" should "return increasing friend numbers and increment the friend list size" in {
     forAll { (count: SmallNat, message: Array[Byte]) =>

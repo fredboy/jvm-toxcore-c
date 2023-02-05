@@ -4,9 +4,9 @@ import im.tox.tox4j.core.ToxCoreConstants
 import im.tox.tox4j.core.data.{ ToxFriendNumber, ToxFileId, ToxFilename }
 import im.tox.tox4j.core.enums.ToxFileKind
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxFileSendExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxFileSendExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   private val friendNumber = ToxFriendNumber.fromInt(0).get
   private val badFriendNumber = ToxFriendNumber.fromInt(1).get

@@ -2,9 +2,9 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.core.data.ToxFriendNumber
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxFriendDeleteExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxFriendDeleteExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   test("DeleteFriendTwice") {
     interceptWithTox(ToxFriendDeleteException.Code.FRIEND_NOT_FOUND) { tox =>

@@ -1,8 +1,8 @@
 package im.tox.tox4j.impl.jni
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-abstract class NamingConventionsTest(jniClass: Class[_], traitClass: Class[_]) extends FunSuite {
+abstract class NamingConventionsTest(jniClass: Class[_], traitClass: Class[_]) extends AnyFunSuite {
 
   private val exemptions = Seq("callback", "load", "close", "create", "getFriendNumbers")
 

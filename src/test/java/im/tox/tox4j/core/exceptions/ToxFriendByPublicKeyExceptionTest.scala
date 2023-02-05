@@ -2,9 +2,9 @@ package im.tox.tox4j.core.exceptions
 
 import im.tox.tox4j.core.data.ToxPublicKey
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxFriendByPublicKeyExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxFriendByPublicKeyExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   test("Null") {
     interceptWithTox(ToxFriendByPublicKeyException.Code.NULL)(

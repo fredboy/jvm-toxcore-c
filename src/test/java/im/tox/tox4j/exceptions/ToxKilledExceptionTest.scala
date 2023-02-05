@@ -1,9 +1,9 @@
 package im.tox.tox4j.exceptions
 
 import im.tox.tox4j.impl.jni.ToxCoreImplFactory.withToxUnit
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxKilledExceptionTest extends FunSuite {
+final class ToxKilledExceptionTest extends AnyFunSuite {
 
   test("UseAfterCloseInOrder") {
     intercept[ToxKilledException] {

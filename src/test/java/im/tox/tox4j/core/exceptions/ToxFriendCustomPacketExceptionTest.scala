@@ -3,9 +3,9 @@ package im.tox.tox4j.core.exceptions
 import im.tox.tox4j.core.ToxCoreConstants
 import im.tox.tox4j.core.data.{ ToxFriendNumber, ToxLosslessPacket, ToxLossyPacket }
 import im.tox.tox4j.testing.ToxTestMixin
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-final class ToxFriendCustomPacketExceptionTest extends FunSuite with ToxTestMixin {
+final class ToxFriendCustomPacketExceptionTest extends AnyFunSuite with ToxTestMixin {
 
   private val friendNumber = ToxFriendNumber.fromInt(0).get
   private val badFriendNumber = ToxFriendNumber.fromInt(1).get

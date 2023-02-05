@@ -12,14 +12,14 @@ import im.tox.tox4j.core.options.ToxOptions
 import im.tox.tox4j.impl.jni.{ ToxAvImpl, ToxCoreImpl }
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{ Arbitrary, Gen }
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Random
 
-final class AvInvokeTest extends FunSuite with ScalaCheckPropertyChecks {
+final class AvInvokeTest extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   final class TestEventListener extends ToxAvEventListener[Option[Event]] {
     private def setEvent(event: Event)(state: Option[Event]): Option[Event] = {
