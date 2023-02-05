@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package im.tox.tox4j.impl.jni.proto;
 
-import "scalapb/scalapb.proto";
-
-option (scalapb.options) = {
-  preserve_unknown_fields: false
-};
-
 // struct timeval from <sys/time.h> representing a point in time.
 message Timestamp {
   int64 seconds = 1;

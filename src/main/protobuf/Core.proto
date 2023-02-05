@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package im.tox.tox4j.core.proto;
 
-import "scalapb/scalapb.proto";
-
-option (scalapb.options) = {
-  preserve_unknown_fields: false
-};
-
 message Connection {
   enum Type {
     NONE    = 0;

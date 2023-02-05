@@ -17,7 +17,7 @@ $(PREFIX)/tox4j.stamp: $(BUILDDIR)/tox4j/Makefile
 # protobuf
 
 $(SRCDIR)/protobuf:
-	git clone --depth=1 --branch=v3.11.1 https://github.com/google/protobuf $@
+	git clone --depth=1 --branch=v21.12 https://github.com/google/protobuf $@
 
 $(PREFIX)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 	@$(PRE_RULE)
@@ -32,11 +32,7 @@ $(PREFIX)/protobuf.stamp: $(SRCDIR)/protobuf $(TOOLCHAIN_FILE) $(PROTOC)
 # toxcore
 
 $(SRCDIR)/toxcore:
-	if [ -e ../c-toxcore ]; then					\
-	  ln -s $(realpath ../c-toxcore) $@;				\
-	else								\
-	  git clone --depth=1 https://github.com/TokTok/c-toxcore $@;	\
-	fi
+	git clone --depth=1 --branch=v0.2.18 --recursive https://github.com/TokTok/c-toxcore $@
 
 $(PREFIX)/toxcore.stamp: $(foreach f,$(shell cd $(SRCDIR)/toxcore && git ls-files),$(SRCDIR)/toxcore/$f)
 $(PREFIX)/toxcore.stamp: $(SRCDIR)/toxcore $(TOOLCHAIN_FILE) $(foreach i,libsodium opus libvpx,$(PREFIX)/$i.stamp)
@@ -66,7 +62,7 @@ $(PREFIX)/libsodium.stamp: $(SRCDIR)/libsodium $(TOOLCHAIN_FILE)
 # opus
 
 $(SRCDIR)/opus:
-	git clone --depth=1 https://github.com/xiph/opus $@
+	git clone --depth=1 --branch=v1.3.1 https://github.com/xiph/opus $@
 
 $(PREFIX)/opus.stamp: $(SRCDIR)/opus $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)
@@ -81,12 +77,11 @@ $(PREFIX)/opus.stamp: $(SRCDIR)/opus $(TOOLCHAIN_FILE)
 # libvpx
 
 $(SRCDIR)/libvpx:
-	git clone --depth=1 --branch=v1.6.0 https://github.com/webmproject/libvpx $@
+	git clone --depth=1 --branch=v1.12.0 https://github.com/webmproject/libvpx $@
 	cd $@ && patch -p1 < $(CURDIR)/scripts/patches/libvpx.patch
 
 $(PREFIX)/libvpx.stamp: $(SRCDIR)/libvpx $(TOOLCHAIN_FILE)
 	@$(PRE_RULE)
-	echo $(PATH)
 	mkdir -p $(BUILDDIR)/$(notdir $<)
 	cd $(BUILDDIR)/$(notdir $<) && $(SRCDIR)/$(notdir $<)/configure $($(notdir $<)_CONFIGURE)
 	$(MAKE) -C $(BUILDDIR)/$(notdir $<) install
