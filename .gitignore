@@ -45,3 +45,7 @@ hsdis-*.*
 
 # Generated proguard configuration.
 /proguard-sbt.txt
+
+/gradle
+
+/build
