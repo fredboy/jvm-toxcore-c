@@ -49,3 +49,5 @@ hsdis-*.*
 /gradle
 
 /build
+
+/.cxx
