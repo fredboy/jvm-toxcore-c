@@ -1,60 +1,102 @@
+//plugins {
+//    id 'com.android.library'
+//    id 'org.jetbrains.kotlin.android'
+//    id 'com.google.protobuf' version '0.9.3'
+//}
+//
+//android {
+//    namespace 'im.tox.tox4j'
+//    compileSdk setup.compileSdk
+//
+//    defaultConfig {
+//        minSdk setup.minSdk
+//        targetSdk setup.targetSdk
+//
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        consumerProguardFiles "consumer-rules.pro"
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags ''
+//            }
+//        }
+//    }
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+//    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//    kotlinOptions {
+//        jvmTarget = '1.8'
+//    }
+//    externalNativeBuild {
+//        cmake {
+//            path file('src/main/cpp/CMakeLists.txt')
+//            version '3.22.1'
+//        }
+//    }
+//}
+//
+//tasks.register('buildHostProtoc', Exec) {
+//    workingDir new File(project.projectDir, 'src/main/cpp/thirdparty/protobuf')
+//    executable new File(project.projectDir, 'src/main/cpp/build_host_protobuf.sh')
+//}
+//
+//tasks.build.dependsOn(buildHostProtoc)
+//
+//dependencies {
+//    api project(path: ':jvm-toxcore-api')
+//    implementation "com.google.protobuf:protobuf-kotlin:${versions.protobuf_kotlin}"
+//}
+//
+//protobuf {
+//    generateProtoTasks {
+//        all().configureEach { task ->
+//            task.builtins {
+//                java { }
+//            }
+//        }
+//    }
+//}
 plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.21'
     id 'com.google.protobuf' version '0.9.3'
 }
 
-android {
-    namespace 'im.tox.tox4j'
-    compileSdk setup.compileSdk
-
-    defaultConfig {
-        minSdk setup.minSdk
-        targetSdk setup.targetSdk
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
-        externalNativeBuild {
-            cmake {
-                cppFlags ''
-            }
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
-        }
-    }
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
-
-tasks.register('buildHostProtoc', Exec) {
-    workingDir new File(project.projectDir, 'src/main/cpp/thirdparty/protobuf')
-    executable new File(project.projectDir, 'src/main/cpp/build_host_protobuf.sh')
+repositories {
+    mavenCentral()
+    mavenLocal()
 }
-
-tasks.build.dependsOn(buildHostProtoc)
-
 dependencies {
-    api project(path: ':jvm-toxcore-api')
-    implementation "com.google.protobuf:protobuf-kotlin:${versions.protobuf_kotlin}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "com.google.protobuf:protobuf-kotlin:3.21.12"
+    api "org.toktok:tox4j-api_2.12:0.2.3"
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.21.12'
+    }
     generateProtoTasks {
         all().configureEach { task ->
             task.builtins {
