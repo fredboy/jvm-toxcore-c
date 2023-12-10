@@ -4,7 +4,7 @@ package im.tox.tox4j.impl.jni;
 public final class ToxCryptoJni {
 
   static {
-    ToxLoadJniLibrary.load("tox4j-c");
+    ToxLoadJniLibrary.INSTANCE.load("tox4j-c");
   }
 
   static native byte[] toxPassKeyEncrypt(byte[] data, byte[] passKey);
