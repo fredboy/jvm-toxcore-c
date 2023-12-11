@@ -1,153 +1,175 @@
 package im.tox.tox4j.impl.jni
 
-import java.util
-
 import com.google.protobuf.ByteString
-import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.OptimisedIdOps._
-import im.tox.tox4j.av.callbacks._
-import im.tox.tox4j.av.data._
-import im.tox.tox4j.av.enums.ToxavFriendCallState
-import im.tox.tox4j.av.proto._
+import im.tox.tox4j.av.callbacks.AudioBitRateCallback
+import im.tox.tox4j.av.callbacks.AudioReceiveFrameCallback
+import im.tox.tox4j.av.callbacks.CallCallback
+import im.tox.tox4j.av.callbacks.CallStateCallback
+import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.av.callbacks.VideoBitRateCallback
+import im.tox.tox4j.av.callbacks.VideoReceiveFrameCallback
+import im.tox.tox4j.av.data.AudioChannels
+import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.av.data.Height
+import im.tox.tox4j.av.data.SamplingRate
+import im.tox.tox4j.av.data.Width
+import im.tox.tox4j.av.proto.AudioBitRate
+import im.tox.tox4j.av.proto.AudioReceiveFrame
+import im.tox.tox4j.av.proto.AvEvents
+import im.tox.tox4j.av.proto.Call
+import im.tox.tox4j.av.proto.CallState
+import im.tox.tox4j.av.proto.VideoBitRate
+import im.tox.tox4j.av.proto.VideoReceiveFrame
 import im.tox.tox4j.core.data.ToxFriendNumber
-import org.jetbrains.annotations.Nullable
-import org.slf4j.LoggerFactory
+import java.util.EnumSet
 
 object ToxAvEventDispatch {
 
-  private val logger = Logger(LoggerFactory.getLogger(getClass))
-
-  private val IntBytes = Integer.SIZE / java.lang.Byte.SIZE
-
-
-
-  private def dispatchCall[S](handler: CallCallback[S], call: Seq[Call])(state: S): S = {
-    call.foldLeft(state) {
-      case (state, Call(friendNumber, audioEnabled, videoEnabled)) =>
-        handler.call(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          audioEnabled,
-          videoEnabled
-        )(state)
+    private fun <S> dispatchCall(
+        handler: CallCallback<S>,
+        callList: List<Call>,
+        state: S,
+    ): S {
+        return callList.fold(state) { state, call ->
+            handler.call(
+                ToxFriendNumber.unsafeFromInt(call.friendNumber),
+                audioEnabled = call.audioEnabled,
+                videoEnabled = call.videoEnabled,
+                state = state,
+            )
+        }
     }
-  }
 
-  private def dispatchCallState[S](handler: CallStateCallback[S], callState: Seq[CallState])(state: S): S = {
-    callState.foldLeft(state) {
-      case (state, CallState(friendNumber, callStateHead +: callStateTail)) =>
-        handler.callState(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          util.EnumSet.of(convert(callStateHead), callStateTail.map(convert): _*)
-        )(state)
+    private fun <S> dispatchCallState(
+        handler: CallStateCallback<S>,
+        callStateList: List<CallState>,
+        state: S,
+    ): S {
+        return callStateList.fold(state) { state, callState ->
+            handler.callState(
+                friendNumber = ToxFriendNumber.unsafeFromInt(callState.friendNumber),
+                callState = callState.callStateList.map(ToxAvProtoConverter::convert).toEnumSet(),
+                state = state,
+            )
+        }
     }
-  }
 
-  private def dispatchAudioBitRate[S](handler: AudioBitRateCallback[S], audioBitRate: Seq[AudioBitRate])(state: S): S = {
-    audioBitRate.foldLeft(state) {
-      case (state, AudioBitRate(friendNumber, audioBitRate)) =>
-        handler.audioBitRate(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          BitRate.unsafeFromInt(audioBitRate)
-        )(state)
+    private fun <S> dispatchAudioBitRate(
+        handler: AudioBitRateCallback<S>,
+        audioBitRateList: List<AudioBitRate>,
+        state: S,
+    ): S {
+        return audioBitRateList.fold(state) { state, audioBitRate ->
+            handler.audioBitRate(
+                friendNumber = ToxFriendNumber.unsafeFromInt(audioBitRate.friendNumber),
+                audioBitRate = BitRate.unsafeFromInt(audioBitRate.audioBitRate),
+                state = state,
+            )
+        }
     }
-  }
 
-  private def dispatchVideoBitRate[S](handler: VideoBitRateCallback[S], videoBitRate: Seq[VideoBitRate])(state: S): S = {
-    videoBitRate.foldLeft(state) {
-      case (state, VideoBitRate(friendNumber, videoBitRate)) =>
-        handler.videoBitRate(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          BitRate.unsafeFromInt(videoBitRate)
-        )(state)
+    private fun <S> dispatchVideoBitRate(
+        handler: VideoBitRateCallback<S>,
+        videoBitRateList: List<VideoBitRate>,
+        state: S,
+    ): S {
+        return videoBitRateList.fold(state) { state, videoBitRate ->
+            handler.videoBitRate(
+                friendNumber = ToxFriendNumber.unsafeFromInt(videoBitRate.friendNumber),
+                videoBitRate = BitRate.unsafeFromInt(videoBitRate.videoBitRate),
+                state = state,
+            )
+        }
     }
-  }
 
-  private def toShortArray(bytes: ByteString): Array[Short] = {
-    val shortBuffer = bytes.asReadOnlyByteBuffer().asShortBuffer()
-    val shortArray = Array.ofDim[Short](shortBuffer.capacity)
-    shortBuffer.get(shortArray)
-    shortArray
-  }
-
-  private def dispatchAudioReceiveFrame[S](handler: AudioReceiveFrameCallback[S], audioReceiveFrame: Seq[AudioReceiveFrame])(state: S): S = {
-    audioReceiveFrame.foldLeft(state) {
-      case (state, AudioReceiveFrame(friendNumber, pcm, channels, samplingRate)) =>
-        handler.audioReceiveFrame(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          toShortArray(pcm),
-          AudioChannels.unsafeFromInt(channels),
-          SamplingRate.unsafeFromInt(samplingRate)
-        )(state)
+    private fun <S> dispatchAudioReceiveFrame(
+        handler: AudioReceiveFrameCallback<S>,
+        audioReceiveFrameList: List<AudioReceiveFrame>,
+        state: S,
+    ): S {
+        return audioReceiveFrameList.fold(state) { state, audioReceiveFrame ->
+            handler.audioReceiveFrame(
+                friendNumber = ToxFriendNumber.unsafeFromInt(audioReceiveFrame.friendNumber),
+                pcm = audioReceiveFrame.pcm.toShortArray(),
+                channels = AudioChannels.unsafeFromInt(audioReceiveFrame.channels),
+                samplingRate = SamplingRate.unsafeFromInt(audioReceiveFrame.samplingRate),
+                state = state,
+            )
+        }
     }
-  }
 
-  private def convert(
-    arrays: Option[(Array[Byte], Array[Byte], Array[Byte])],
-    y: ByteString, u: ByteString, v: ByteString
-  ): (Array[Byte], Array[Byte], Array[Byte]) = {
-    arrays match {
-      case None =>
-        (y.toByteArray, u.toByteArray, v.toByteArray)
-      case Some(arrays) =>
-        y.copyTo(arrays._1, 0)
-        u.copyTo(arrays._2, 0)
-        v.copyTo(arrays._3, 0)
-        arrays
+    private fun <S> dispatchVideoReceiveFrame(
+        handler: VideoReceiveFrameCallback<S>,
+        videoReceiveFrameList: List<VideoReceiveFrame>,
+        state: S,
+    ): S {
+        return videoReceiveFrameList.fold(state) { state, videoReceiveFrame ->
+            val width = Width.unsafeFromInt(videoReceiveFrame.width)
+            val height = Height.unsafeFromInt(videoReceiveFrame.height)
+
+            val (yArray, uArray, vArray) = ToxAvProtoConverter.convert(
+                arrays = handler.videFrameCachedYUV(
+                    height = height,
+                    yStride = videoReceiveFrame.yStride,
+                    uStride = videoReceiveFrame.uStride,
+                    vStride = videoReceiveFrame.vStride
+                ),
+                y = videoReceiveFrame.y,
+                u = videoReceiveFrame.u,
+                v = videoReceiveFrame.v,
+            )
+
+            handler.videoReceiveFrame(
+                friendNumber = ToxFriendNumber.unsafeFromInt(videoReceiveFrame.friendNumber),
+                width = width,
+                height = height,
+                y = yArray,
+                u = uArray,
+                v = vArray,
+                yStride = videoReceiveFrame.yStride,
+                uStride = videoReceiveFrame.uStride,
+                vStride = videoReceiveFrame.vStride,
+                state = state,
+            )
+        }
     }
-  }
 
-  private def dispatchVideoReceiveFrame[S](handler: VideoReceiveFrameCallback[S], videoReceiveFrame: Seq[VideoReceiveFrame])(state: S): S = {
-    videoReceiveFrame.foldLeft(state) {
-      case (state, VideoReceiveFrame(friendNumber, width, height, y, u, v, yStride, uStride, vStride)) =>
-        val w = Width.unsafeFromInt(width)
-        val h = Height.unsafeFromInt(height)
-        val (yArray, uArray, vArray) = convert(handler.videoFrameCachedYUV(h, yStride, uStride, vStride), y, u, v)
-
-        handler.videoReceiveFrame(
-          ToxFriendNumber.unsafeFromInt(friendNumber),
-          w,
-          h,
-          yArray,
-          uArray,
-          vArray,
-          yStride,
-          uStride,
-          vStride
-        )(state)
+    private inline fun <reified T : Enum<T>> List<T>.toEnumSet(): EnumSet<T> {
+        return EnumSet.noneOf(T::class.java).also { set ->
+            set.addAll(this)
+        }
     }
-  }
 
-  private def dispatchEvents[S](handler: ToxAvEventListener[S], events: AvEvents)(state: S): S = {
-    (state
-      |> dispatchCall(handler, events.call)
-      |> dispatchCallState(handler, events.callState)
-      |> dispatchAudioBitRate(handler, events.audioBitRate)
-      |> dispatchVideoBitRate(handler, events.videoBitRate)
-      |> dispatchAudioReceiveFrame(handler, events.audioReceiveFrame)
-      |> dispatchVideoReceiveFrame(handler, events.videoReceiveFrame))
-  }
-
-  private def decodeInt32(eventData: Array[Byte]): Int = {
-    assert(eventData.length >= IntBytes)
-    (0
-      | eventData(0) << (8 * 3)
-      | eventData(1) << (8 * 2)
-      | eventData(2) << (8 * 1)
-      | eventData(3) << (8 * 0))
-  }
-
-  @SuppressWarnings(Array(
-    "org.wartremover.warts.ArrayEquals",
-    "org.wartremover.warts.Equals",
-    "org.wartremover.warts.Null"
-  ))
-  def dispatch[S](handler: ToxAvEventListener[S], @Nullable eventData: Array[Byte])(state: S): S = {
-    if (eventData == null) { // scalastyle:ignore null
-      state
-    } else {
-      val events = AvEvents.parseFrom(eventData)
-      dispatchEvents(handler, events)(state)
+    private fun ByteString.toShortArray(): ShortArray {
+        val shortBuffer = asReadOnlyByteBuffer().asShortBuffer()
+        val shortArray = ShortArray(shortBuffer.capacity())
+        shortBuffer.get(shortArray)
+        return shortArray
     }
-  }
+
+    fun <S> dispatch(
+        eventListener: ToxAvEventListener<S>,
+        eventData: ByteArray?,
+        state: S
+    ): S {
+        if (eventData == null) {
+            return state
+        }
+
+        val events = AvEvents.parseFrom(eventData)
+
+        return events.run {
+            sequence<(S) -> S> {
+                yield { dispatchCall(eventListener, callList, it) }
+                yield { dispatchCallState(eventListener, callStateList, it) }
+                yield { dispatchAudioBitRate(eventListener, audioBitRateList, it) }
+                yield { dispatchVideoBitRate(eventListener, videoBitRateList, it) }
+                yield { dispatchAudioReceiveFrame(eventListener, audioReceiveFrameList, it) }
+                yield { dispatchVideoReceiveFrame(eventListener, videoReceiveFrameList, it) }
+            }
+        }.fold(state) { state, dispatcher ->
+            dispatcher.invoke(state)
+        }
+    }
 
 }
