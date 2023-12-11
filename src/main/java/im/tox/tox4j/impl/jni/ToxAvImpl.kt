@@ -1,120 +1,197 @@
 package im.tox.tox4j.impl.jni
 
-import java.util
-
-import com.typesafe.scalalogging.Logger
-import im.tox.tox4j.av._
-import im.tox.tox4j.av.callbacks._
-import im.tox.tox4j.av.data._
-import im.tox.tox4j.av.enums.{ ToxavCallControl, ToxavFriendCallState }
-import im.tox.tox4j.av.exceptions._
+import im.tox.tox4j.av.ToxAv
+import im.tox.tox4j.av.callbacks.ToxAvEventListener
+import im.tox.tox4j.av.data.AudioChannels
+import im.tox.tox4j.av.data.BitRate
+import im.tox.tox4j.av.data.Height
+import im.tox.tox4j.av.data.SampleCount
+import im.tox.tox4j.av.data.SamplingRate
+import im.tox.tox4j.av.data.Width
+import im.tox.tox4j.av.enums.ToxavCallControl
+import im.tox.tox4j.av.enums.ToxavFriendCallState
+import im.tox.tox4j.av.exceptions.ToxavAnswerException
+import im.tox.tox4j.av.exceptions.ToxavBitRateSetException
+import im.tox.tox4j.av.exceptions.ToxavCallControlException
+import im.tox.tox4j.av.exceptions.ToxavCallException
+import im.tox.tox4j.av.exceptions.ToxavNewException
+import im.tox.tox4j.av.exceptions.ToxavSendFrameException
 import im.tox.tox4j.core.ToxCore
 import im.tox.tox4j.core.data.ToxFriendNumber
-import im.tox.tox4j.impl.jni.ToxAvImpl.logger
-import im.tox.tox4j.impl.jni.internal.Event
-import org.jetbrains.annotations.NotNull
 import org.slf4j.LoggerFactory
+import java.lang.ClassCastException
+import java.util.EnumSet
 
-private object ToxAvImpl {
-  private val logger = Logger(LoggerFactory.getLogger(getClass))
-}
+class ToxAvImpl @Throws(ToxavNewException::class) constructor(
+  private val tox: ToxCoreImpl
+) : ToxAv {
 
-/**
- * Initialise an A/V session for the existing Tox instance.
- *
- * @param tox An instance of the C-backed ToxCore implementation.
- */
-// scalastyle:off no.finalize
-@throws[ToxavNewException]("If there was already an A/V session.")
-final class ToxAvImpl(@NotNull private val tox: ToxCoreImpl) extends ToxAv {
+  private val onClose = tox.addOnCloseCallback(::close)
 
-  private[this] val onClose: Event.Id = tox.addOnCloseCallback(close)
+  internal val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
 
-  private[jni] val instanceNumber = ToxAvJni.toxavNew(tox.instanceNumber)
-
-  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-  override def create(tox: ToxCore): ToxAv = {
-    try {
-      new ToxAvImpl(tox.asInstanceOf[ToxCoreImpl])
-    } catch {
-      case _: ClassCastException =>
-        throw new ToxavNewException(ToxavNewException.Code.INCOMPATIBLE, tox.getClass.getCanonicalName)
+  override fun create(tox: ToxCore): ToxAv {
+    return try {
+      ToxAvImpl(tox as ToxCoreImpl)
+    } catch (e: ClassCastException) {
+      throw ToxavNewException(
+        ToxavNewException.Code.INCOMPATIBLE,
+        tox::class.java.canonicalName
+      )
     }
   }
 
-  override def close(): Unit = {
+  override fun close() {
     tox.removeOnCloseCallback(onClose)
     ToxAvJni.toxavKill(instanceNumber)
   }
 
-  protected override def finalize(): Unit = {
+  protected fun finalize() {
     try {
       ToxAvJni.toxavFinalize(instanceNumber)
-    } catch {
-      case e: Throwable =>
-        logger.error("Exception caught in finalizer; this indicates a serious problem in native code", e)
+    } catch (e: Throwable) {
+      logger.error(
+        "Exception caught in finalizer; this indicates a serious problem in native code",
+        e
+      )
     }
-    super.finalize()
   }
 
-  override def iterate[S](@NotNull handler: ToxAvEventListener[S])(state: S): S = {
-    ToxAvEventDispatch.dispatch(handler, ToxAvJni.toxavIterate(instanceNumber))(state)
+  override fun <S> iterate(handler: ToxAvEventListener<S>, state: S): S {
+    return ToxAvEventDispatch.dispatch(handler, ToxAvJni.toxavIterate(instanceNumber), state)
   }
 
-  override def iterationInterval: Int =
-    ToxAvJni.toxavIterationInterval(instanceNumber)
+  override val iterationInterval: Int
+    get() = ToxAvJni.toxavIterationInterval(instanceNumber)
 
-  @throws[ToxavCallException]
-  override def call(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit =
-    ToxAvJni.toxavCall(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
+  @Throws(ToxavCallException::class)
+  override fun call(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate) {
+    ToxAvJni.toxavCall(
+      instanceNumber,
+      friendNumber.value,
+      audioBitRate.value,
+      videoBitRate.value
+    )
+  }
 
-  @throws[ToxavAnswerException]
-  override def answer(friendNumber: ToxFriendNumber, audioBitRate: BitRate, videoBitRate: BitRate): Unit =
-    ToxAvJni.toxavAnswer(instanceNumber, friendNumber.value, audioBitRate.value, videoBitRate.value)
-
-  @throws[ToxavCallControlException]
-  override def callControl(friendNumber: ToxFriendNumber, control: ToxavCallControl): Unit =
-    ToxAvJni.toxavCallControl(instanceNumber, friendNumber.value, control.ordinal)
-
-  @throws[ToxavBitRateSetException]
-  override def setAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate): Unit =
-    ToxAvJni.toxavAudioSetBitRate(instanceNumber, friendNumber.value, audioBitRate.value)
-
-  @throws[ToxavBitRateSetException]
-  override def setVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate): Unit =
-    ToxAvJni.toxavVideoSetBitRate(instanceNumber, friendNumber.value, videoBitRate.value)
-
-  @throws[ToxavSendFrameException]
-  override def audioSendFrame(
+  @Throws(ToxavAnswerException::class)
+  override fun answer(
     friendNumber: ToxFriendNumber,
-    pcm: Array[Short],
+    audioBitRate: BitRate,
+    videoBitRate: BitRate
+  ) {
+    ToxAvJni.toxavAnswer(
+      instanceNumber,
+      friendNumber.value,
+      audioBitRate.value,
+      videoBitRate.value
+    )
+  }
+
+  @Throws(ToxavCallControlException::class)
+  override fun callControl(friendNumber: ToxFriendNumber, control: ToxavCallControl) {
+    ToxAvJni.toxavCallControl(instanceNumber, friendNumber.value, control.ordinal)
+  }
+
+  @Throws(ToxavBitRateSetException::class)
+  override fun setAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate) {
+    ToxAvJni.toxavAudioSetBitRate(instanceNumber, friendNumber.value, audioBitRate.value)
+  }
+
+  @Throws(ToxavBitRateSetException::class)
+  override fun setVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate) {
+    ToxAvJni.toxavVideoSetBitRate(instanceNumber, friendNumber.value, videoBitRate.value)
+  }
+
+  @Throws(ToxavSendFrameException::class)
+  override fun audioSendFrame(
+    friendNumber: ToxFriendNumber,
+    pcm: ShortArray,
     sampleCount: SampleCount,
     channels: AudioChannels,
     samplingRate: SamplingRate
-  ): Unit = {
-    ToxAvJni.toxavAudioSendFrame(instanceNumber, friendNumber.value, pcm, sampleCount.value, channels.value, samplingRate.value)
+  ) {
+    ToxAvJni.toxavAudioSendFrame(
+      instanceNumber,
+      friendNumber.value,
+      pcm,
+      sampleCount.value,
+      channels.value,
+      samplingRate.value
+    )
   }
 
-  @throws[ToxavSendFrameException]
-  override def videoSendFrame(
+  @Throws(ToxavSendFrameException::class)
+  override fun videoSendFrame(
     friendNumber: ToxFriendNumber,
-    width: Int, height: Int,
-    y: Array[Byte], u: Array[Byte], v: Array[Byte]
-  ): Unit = {
+    width: Int,
+    height: Int,
+    y: ByteArray,
+    u: ByteArray,
+    v: ByteArray
+  ) {
     ToxAvJni.toxavVideoSendFrame(instanceNumber, friendNumber.value, width, height, y, u, v)
   }
 
-  def invokeAudioReceiveFrame(friendNumber: ToxFriendNumber, pcm: Array[Short], channels: AudioChannels, samplingRate: SamplingRate): Unit =
-    ToxAvJni.invokeAudioReceiveFrame(instanceNumber, friendNumber.value, pcm, channels.value, samplingRate.value)
-  def invokeAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate): Unit =
+  override fun invokeAudioReceiveFrame(
+    friendNumber: ToxFriendNumber,
+    pcm: ShortArray,
+    channels: AudioChannels,
+    samplingRate: SamplingRate
+  ) = ToxAvJni.invokeAudioReceiveFrame(
+    instanceNumber,
+    friendNumber.value,
+    pcm,
+    channels.value,
+    samplingRate.value
+  )
+
+  override fun invokeAudioBitRate(friendNumber: ToxFriendNumber, audioBitRate: BitRate) =
     ToxAvJni.invokeAudioBitRate(instanceNumber, friendNumber.value, audioBitRate.value)
-  def invokeVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate): Unit =
+
+  override fun invokeVideoBitRate(friendNumber: ToxFriendNumber, videoBitRate: BitRate) =
     ToxAvJni.invokeVideoBitRate(instanceNumber, friendNumber.value, videoBitRate.value)
-  def invokeCall(friendNumber: ToxFriendNumber, audioEnabled: Boolean, videoEnabled: Boolean): Unit =
-    ToxAvJni.invokeCall(instanceNumber, friendNumber.value, audioEnabled, videoEnabled)
-  def invokeCallState(friendNumber: ToxFriendNumber, callState: util.EnumSet[ToxavFriendCallState]): Unit =
-    ToxAvJni.invokeCallState(instanceNumber, friendNumber.value, ToxAvEventDispatch.convert(callState))
-  def invokeVideoReceiveFrame(friendNumber: ToxFriendNumber, width: Width, height: Height, y: Array[Byte], u: Array[Byte], v: Array[Byte], yStride: Int, uStride: Int, vStride: Int): Unit = // scalastyle:ignore line.size.limit
-    ToxAvJni.invokeVideoReceiveFrame(instanceNumber, friendNumber.value, width.value, height.value, y, u, v, yStride, uStride, vStride)
+
+  override fun invokeCall(
+    friendNumber: ToxFriendNumber,
+    audioEnabled: Boolean,
+    videoEnabled: Boolean
+  ) = ToxAvJni.invokeCall(instanceNumber, friendNumber.value, audioEnabled, videoEnabled)
+
+  override fun invokeCallState(
+    friendNumber: ToxFriendNumber,
+    callState: EnumSet<ToxavFriendCallState>
+  ) = ToxAvJni.invokeCallState(
+    instanceNumber,
+    friendNumber.value,
+    ToxAvProtoConverter.convert(callState)
+  )
+
+  override fun invokeVideoReceiveFrame(
+    friendNumber: ToxFriendNumber,
+    width: Width,
+    height: Height,
+    y: ByteArray,
+    u: ByteArray,
+    v: ByteArray,
+    yStride: Int,
+    uStride: Int,
+    vStride: Int
+  ) = ToxAvJni.invokeVideoReceiveFrame(
+    instanceNumber,
+    friendNumber.value,
+    width.value,
+    height.value,
+    y,
+    u,
+    v,
+    yStride,
+    uStride,
+    vStride
+  )
+
+  companion object {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+  }
 
 }
