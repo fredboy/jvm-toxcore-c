@@ -1,36 +1,53 @@
 package im.tox.tox4j.impl.jni
 
-import im.tox.tox4j.crypto.{ ToxCrypto, ToxCryptoConstants }
+import im.tox.tox4j.crypto.ToxCrypto
+import im.tox.tox4j.crypto.ToxCryptoConstants
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
-object ToxCryptoImpl extends ToxCrypto {
+object ToxCryptoImpl : ToxCrypto<ByteArray> {
 
-  override type PassKey = Array[Byte]
+  override fun passKeyEquals(a: ByteArray, b: ByteArray): Boolean {
+    return a.contentEquals(b)
+  }
 
-  override def passKeyEquals(a: PassKey, b: PassKey): Boolean = a.deep == b.deep
-  override def passKeyToBytes(passKey: PassKey): Seq[Byte] = passKey
+  override fun passKeyToBytes(passKey: ByteArray): List<Byte> {
+    return passKey.toList()
+  }
 
-  override def passKeyFromBytes(bytes: Seq[Byte]): Option[PassKey] = {
-    if (bytes.length == ToxCryptoConstants.KeyLength + ToxCryptoConstants.SaltLength) {
-      Some(bytes.toArray)
+  override fun passKeyFromBytes(bytes: ByteArray): ByteArray? {
+    return if (bytes.size == ToxCryptoConstants.keyLength + ToxCryptoConstants.saltLength) {
+      bytes.copyOf()
     } else {
-      None
+      null
     }
   }
 
-  override def encrypt(data: Array[Byte], passKey: PassKey): Array[Byte] =
-    ToxCryptoJni.toxPassKeyEncrypt(data, passKey)
-  override def getSalt(data: Array[Byte]): Array[Byte] =
-    ToxCryptoJni.toxGetSalt(data)
-  override def isDataEncrypted(data: Array[Byte]): Boolean =
-    ToxCryptoJni.toxIsDataEncrypted(data)
-  override def passKeyDeriveWithSalt(passphrase: Array[Byte], salt: Array[Byte]): PassKey =
-    ToxCryptoJni.toxPassKeyDeriveWithSalt(passphrase, salt)
-  override def passKeyDerive(passphrase: Array[Byte]): PassKey =
-    ToxCryptoJni.toxPassKeyDerive(passphrase)
-  override def decrypt(data: Array[Byte], passKey: PassKey): Array[Byte] =
-    ToxCryptoJni.toxPassKeyDecrypt(data, passKey)
-  override def hash(data: Array[Byte]): Array[Byte] =
-    ToxCryptoJni.toxHash(data)
+  override fun encrypt(data: ByteArray, passKey: ByteArray): ByteArray {
+    return ToxCryptoJni.toxPassKeyEncrypt(data, passKey)
+  }
+
+  override fun getSalt(data: ByteArray): ByteArray {
+    return ToxCryptoJni.toxGetSalt(data)
+  }
+
+  override fun isDataEncrypted(data: ByteArray): Boolean {
+    return ToxCryptoJni.toxIsDataEncrypted(data)
+  }
+
+  override fun passKeyDeriveWithSalt(passPhrase: ByteArray, salt: ByteArray): ByteArray {
+    return ToxCryptoJni.toxPassKeyDeriveWithSalt(passPhrase, salt)
+  }
+
+  override fun passKeyDerive(passPhrase: ByteArray): ByteArray {
+    return ToxCryptoJni.toxPassKeyDerive(passPhrase)
+  }
+
+  override fun decrypt(data: ByteArray, passKey: ByteArray): ByteArray {
+    return ToxCryptoJni.toxPassKeyDecrypt(data, passKey)
+  }
+
+
+  override fun hash(data: ByteArray): ByteArray {
+    return ToxCryptoJni.toxHash(data)
+  }
 
 }
