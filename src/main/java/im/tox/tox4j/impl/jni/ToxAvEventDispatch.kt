@@ -19,31 +19,7 @@ object ToxAvEventDispatch {
 
   private val IntBytes = Integer.SIZE / java.lang.Byte.SIZE
 
-  def convert(kind: CallState.Kind): ToxavFriendCallState = {
-    kind match {
-      case CallState.Kind.ERROR       => ToxavFriendCallState.ERROR
-      case CallState.Kind.FINISHED    => ToxavFriendCallState.FINISHED
-      case CallState.Kind.SENDING_A   => ToxavFriendCallState.SENDING_A
-      case CallState.Kind.SENDING_V   => ToxavFriendCallState.SENDING_V
-      case CallState.Kind.ACCEPTING_A => ToxavFriendCallState.ACCEPTING_A
-      case CallState.Kind.ACCEPTING_V => ToxavFriendCallState.ACCEPTING_V
-    }
-  }
 
-  def convert(callState: util.EnumSet[ToxavFriendCallState]): Int = {
-    import scala.collection.JavaConverters._
-    callState.asScala.foldLeft(0) { (bitMask, state) =>
-      val nextMask = state match {
-        case ToxavFriendCallState.ERROR       => 1 << 0
-        case ToxavFriendCallState.FINISHED    => 1 << 1
-        case ToxavFriendCallState.SENDING_A   => 1 << 2
-        case ToxavFriendCallState.SENDING_V   => 1 << 3
-        case ToxavFriendCallState.ACCEPTING_A => 1 << 4
-        case ToxavFriendCallState.ACCEPTING_V => 1 << 5
-      }
-      bitMask | nextMask
-    }
-  }
 
   private def dispatchCall[S](handler: CallCallback[S], call: Seq[Call])(state: S): S = {
     call.foldLeft(state) {
