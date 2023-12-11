@@ -9,11 +9,11 @@ object ToxImplBase {
     fatal: Boolean,
     state: ToxCoreState,
     eventHandler: T,
-    callback: ((T) -> ((ToxCoreState) -> ToxCoreState))
+    callback: (T, ToxCoreState) -> ToxCoreState,
   ): ToxCoreState {
     return if (!fatal) {
       try {
-        callback(eventHandler)(state)
+        callback(eventHandler, state)
       } catch (throwable: Throwable) {
         if (isNonFatal(throwable)) {
           logger.warn(
@@ -26,7 +26,7 @@ object ToxImplBase {
         }
       }
     } else {
-      callback(eventHandler)(state)
+      callback(eventHandler, state)
     }
   }
 
